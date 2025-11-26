@@ -345,46 +345,54 @@ const App: React.FC = () => {
         )}
 
         {showSalesModal && (
-            <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
-                <SalesEntry 
-                    onSave={handleSaveTransaction} 
-                    customers={customers} 
-                    products={products}
-                    onCancel={() => setShowSalesModal(false)}
-                    initialType={salesModalConfig.type}
-                    initialPaymentMethod={salesModalConfig.method}
-                />
+            <div className="fixed inset-0 z-50 overflow-y-auto bg-black/50 backdrop-blur-sm">
+                <div className="flex min-h-full items-center justify-center p-4 pt-12 pb-24">
+                    <SalesEntry 
+                        onSave={handleSaveTransaction} 
+                        customers={customers} 
+                        products={products}
+                        onCancel={() => setShowSalesModal(false)}
+                        initialType={salesModalConfig.type}
+                        initialPaymentMethod={salesModalConfig.method}
+                    />
+                </div>
             </div>
         )}
         
         {showProductModal && (
-            <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
-                <ProductEntry 
-                    onSave={handleSaveProduct} 
-                    onCancel={() => setShowProductModal(false)}
-                    initialProduct={editingProduct}
-                />
+            <div className="fixed inset-0 z-50 overflow-y-auto bg-black/50 backdrop-blur-sm">
+                <div className="flex min-h-full items-center justify-center p-4 pt-12 pb-24">
+                    <ProductEntry 
+                        onSave={handleSaveProduct} 
+                        onCancel={() => setShowProductModal(false)}
+                        initialProduct={editingProduct}
+                    />
+                </div>
             </div>
         )}
 
         {showCustomerModal && (
-            <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
-                <CustomerEntry 
-                    onSave={handleSaveCustomer} 
-                    onCancel={() => setShowCustomerModal(false)}
-                    initialCustomer={editingCustomer}
-                />
+            <div className="fixed inset-0 z-50 overflow-y-auto bg-black/50 backdrop-blur-sm">
+                <div className="flex min-h-full items-center justify-center p-4 pt-12 pb-24">
+                    <CustomerEntry 
+                        onSave={handleSaveCustomer} 
+                        onCancel={() => setShowCustomerModal(false)}
+                        initialCustomer={editingCustomer}
+                    />
+                </div>
             </div>
         )}
 
         {selectedCustomerForDebt && (
-            <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
-                <DebtEntry 
-                    customer={selectedCustomerForDebt}
-                    products={products}
-                    onSave={handleSaveTransaction} 
-                    onCancel={() => setSelectedCustomerForDebt(null)}
-                />
+            <div className="fixed inset-0 z-50 overflow-y-auto bg-black/50 backdrop-blur-sm">
+                <div className="flex min-h-full items-center justify-center p-4 pt-12 pb-24">
+                    <DebtEntry 
+                        customer={selectedCustomerForDebt}
+                        products={products}
+                        onSave={handleSaveTransaction} 
+                        onCancel={() => setSelectedCustomerForDebt(null)}
+                    />
+                </div>
             </div>
         )}
 

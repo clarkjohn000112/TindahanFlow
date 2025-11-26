@@ -25,22 +25,27 @@ export const SalesEntry: React.FC<SalesEntryProps> = ({
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>(initialPaymentMethod);
   const [selectedCustomerId, setSelectedCustomerId] = useState<string>('');
   const [selectedProductId, setSelectedProductId] = useState<string>('');
-  const [quantity, setQuantity] = useState<number>(1);
+  
+  // Use string for quantity to allow clearing the input ("") while typing
+  const [quantityStr, setQuantityStr] = useState<string>('1');
 
   // Auto-fill details when a product is selected
   useEffect(() => {
     if (selectedProductId) {
         const product = products.find(p => p.id === selectedProductId);
-        if (product) {
-            setAmount((product.price * quantity).toString());
-            setDescription(`${quantity}x ${product.name}`);
+        const qty = parseInt(quantityStr) || 0;
+        if (product && qty > 0) {
+            setAmount((product.price * qty).toString());
+            setDescription(`${qty}x ${product.name}`);
         }
     }
-  }, [selectedProductId, quantity, products]);
+  }, [selectedProductId, quantityStr, products]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!amount || isNaN(Number(amount))) return;
+
+    const finalQty = parseInt(quantityStr) || 1;
 
     onSave({
       type,
@@ -49,8 +54,16 @@ export const SalesEntry: React.FC<SalesEntryProps> = ({
       paymentMethod,
       customerId: paymentMethod === PaymentMethod.CREDIT ? selectedCustomerId : undefined,
       productId: selectedProductId || undefined,
-      quantity: quantity
+      quantity: finalQty
     });
+  };
+
+  const handleQuantityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      // Allow user to type empty string or numbers
+      const val = e.target.value;
+      if (val === '' || /^\d+$/.test(val)) {
+          setQuantityStr(val);
+      }
   };
 
   return (
@@ -106,11 +119,13 @@ export const SalesEntry: React.FC<SalesEntryProps> = ({
                         <div className="flex-1">
                              <label className="block text-xs text-blue-600 mb-1">Quantity</label>
                              <input 
-                                type="number" 
+                                type="number" // Changed to text or number but handled as string
+                                inputMode="numeric"
                                 min="1" 
-                                value={quantity}
-                                onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
-                                className="w-full p-2 border border-blue-200 rounded-lg text-sm text-center"
+                                value={quantityStr}
+                                onChange={handleQuantityChange}
+                                onBlur={() => { if (!quantityStr || parseInt(quantityStr) === 0) setQuantityStr('1'); }}
+                                className="w-full p-2 border border-blue-200 rounded-lg text-sm text-center font-bold"
                              />
                         </div>
                         <div className="flex-1 text-right">

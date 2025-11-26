@@ -22,7 +22,8 @@ export const DebtEntry: React.FC<DebtEntryProps> = ({ customer, products, onSave
   
   // Product Selection State
   const [selectedProductId, setSelectedProductId] = useState('');
-  const [quantity, setQuantity] = useState(1);
+  // Use string for quantity to allow clearing the input ("") while typing
+  const [quantityStr, setQuantityStr] = useState<string>('1');
 
   // Reset state when action changes
   useEffect(() => {
@@ -43,18 +44,21 @@ export const DebtEntry: React.FC<DebtEntryProps> = ({ customer, products, onSave
   useEffect(() => {
     if (action === 'BORROW' && mode === 'PRODUCT' && selectedProductId) {
         const product = products.find(p => p.id === selectedProductId);
-        if (product) {
-            const total = product.price * quantity;
+        const qty = parseInt(quantityStr) || 0;
+        if (product && qty > 0) {
+            const total = product.price * qty;
             setAmount(total.toString());
             // Auto-generate description
-            setDescription(`${quantity}x ${product.name}`);
+            setDescription(`${qty}x ${product.name}`);
         }
     }
-  }, [selectedProductId, quantity, mode, products, action]);
+  }, [selectedProductId, quantityStr, mode, products, action]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!amount || isNaN(Number(amount))) return;
+
+    const finalQty = parseInt(quantityStr) || 1;
 
     if (action === 'BORROW') {
         // Borrowing means a Credit Sale
@@ -66,7 +70,7 @@ export const DebtEntry: React.FC<DebtEntryProps> = ({ customer, products, onSave
             customerId: customer.id,
             // Only attach product ID if we are in PRODUCT mode
             productId: (mode === 'PRODUCT' && selectedProductId) ? selectedProductId : undefined,
-            quantity: (mode === 'PRODUCT' && selectedProductId) ? quantity : undefined
+            quantity: (mode === 'PRODUCT' && selectedProductId) ? finalQty : undefined
         });
     } else {
         // Paying means Payment Received
@@ -78,6 +82,14 @@ export const DebtEntry: React.FC<DebtEntryProps> = ({ customer, products, onSave
             customerId: customer.id
         });
     }
+  };
+
+  const handleQuantityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      // Allow user to type empty string or numbers
+      const val = e.target.value;
+      if (val === '' || /^\d+$/.test(val)) {
+          setQuantityStr(val);
+      }
   };
 
   return (
@@ -177,9 +189,11 @@ export const DebtEntry: React.FC<DebtEntryProps> = ({ customer, products, onSave
                              <label className="block text-xs text-amber-700 mb-1">Quantity</label>
                              <input 
                                 type="number" 
+                                inputMode="numeric"
                                 min="1" 
-                                value={quantity}
-                                onChange={(e) => setQuantity(Math.max(1, parseInt(e.target.value) || 1))}
+                                value={quantityStr}
+                                onChange={handleQuantityChange}
+                                onBlur={() => { if (!quantityStr || parseInt(quantityStr) === 0) setQuantityStr('1'); }}
                                 className="w-full p-2 border border-amber-200 rounded-lg text-sm text-center font-bold text-gray-800"
                              />
                         </div>
