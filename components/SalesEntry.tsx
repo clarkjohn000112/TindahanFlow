@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { TransactionType, PaymentMethod, Customer, Transaction, Product } from '../types';
-import { Save, X, Search } from 'lucide-react';
+import { Save, X } from 'lucide-react';
 
 interface SalesEntryProps {
   onSave: (transaction: Omit<Transaction, 'id' | 'date'>) => void;
@@ -119,9 +119,8 @@ export const SalesEntry: React.FC<SalesEntryProps> = ({
                         <div className="flex-1">
                              <label className="block text-xs text-blue-600 mb-1">Quantity</label>
                              <input 
-                                type="number" // Changed to text or number but handled as string
+                                type="text"
                                 inputMode="numeric"
-                                min="1" 
                                 value={quantityStr}
                                 onChange={handleQuantityChange}
                                 onBlur={() => { if (!quantityStr || parseInt(quantityStr) === 0) setQuantityStr('1'); }}

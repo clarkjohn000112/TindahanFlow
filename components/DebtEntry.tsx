@@ -15,14 +15,13 @@ type InputMode = 'MANUAL' | 'PRODUCT';
 
 export const DebtEntry: React.FC<DebtEntryProps> = ({ customer, products, onSave, onCancel }) => {
   const [action, setAction] = useState<ActionType>('BORROW');
-  const [mode, setMode] = useState<InputMode>('PRODUCT'); // Default to product for easier stock tracking
+  const [mode, setMode] = useState<InputMode>('PRODUCT'); 
   
   const [amount, setAmount] = useState('');
   const [description, setDescription] = useState('');
   
   // Product Selection State
   const [selectedProductId, setSelectedProductId] = useState('');
-  // Use string for quantity to allow clearing the input ("") while typing
   const [quantityStr, setQuantityStr] = useState<string>('1');
 
   // Reset state when action changes
@@ -188,9 +187,8 @@ export const DebtEntry: React.FC<DebtEntryProps> = ({ customer, products, onSave
                         <div className="flex-1">
                              <label className="block text-xs text-amber-700 mb-1">Quantity</label>
                              <input 
-                                type="number" 
+                                type="text"
                                 inputMode="numeric"
-                                min="1" 
                                 value={quantityStr}
                                 onChange={handleQuantityChange}
                                 onBlur={() => { if (!quantityStr || parseInt(quantityStr) === 0) setQuantityStr('1'); }}

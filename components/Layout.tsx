@@ -1,15 +1,17 @@
 import React from 'react';
 import { View } from '../types';
-import { LayoutDashboard, ShoppingCart, Users, Package, RotateCcw } from 'lucide-react';
+import { LayoutDashboard, ShoppingCart, Users, Package, RotateCcw, LogOut } from 'lucide-react';
 
 interface LayoutProps {
   currentView: View;
   setCurrentView: (view: View) => void;
   children: React.ReactNode;
   onReset: () => void;
+  onLogout: () => void;
+  username?: string;
 }
 
-export const Layout: React.FC<LayoutProps> = ({ currentView, setCurrentView, children, onReset }) => {
+export const Layout: React.FC<LayoutProps> = ({ currentView, setCurrentView, children, onReset, onLogout, username }) => {
   const navItems = [
     { id: 'DASHBOARD', icon: LayoutDashboard, label: 'Home' },
     { id: 'SALES', icon: ShoppingCart, label: 'Sales' },
@@ -25,6 +27,7 @@ export const Layout: React.FC<LayoutProps> = ({ currentView, setCurrentView, chi
             <h1 className="text-2xl font-bold text-indigo-700 flex items-center gap-2">
                 Tindahan<span className="text-gray-800">Flow</span>
             </h1>
+            {username && <p className="text-xs text-gray-500 mt-1">Logged in as {username}</p>}
         </div>
         <nav className="flex-1 p-4 space-y-2">
             {navItems.map((item) => (
@@ -46,10 +49,17 @@ export const Layout: React.FC<LayoutProps> = ({ currentView, setCurrentView, chi
         <div className="p-4 border-t border-gray-100 space-y-2">
              <button 
                 onClick={onReset}
-                className="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-xs font-medium text-rose-600 hover:bg-rose-50 transition-colors mt-2"
+                className="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-xs font-medium text-rose-600 hover:bg-rose-50 transition-colors"
              >
                  <RotateCcw size={16} />
                  Reset Data
+             </button>
+             <button 
+                onClick={onLogout}
+                className="w-full flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-xs font-medium text-gray-500 hover:bg-gray-100 transition-colors"
+             >
+                 <LogOut size={16} />
+                 Logout
              </button>
         </div>
       </aside>
@@ -58,7 +68,10 @@ export const Layout: React.FC<LayoutProps> = ({ currentView, setCurrentView, chi
       <main className="flex-1 min-h-screen flex flex-col">
          {/* Mobile Header */}
          <div className="md:hidden bg-white p-4 sticky top-0 z-20 shadow-sm flex items-center justify-between">
-            <h1 className="text-xl font-bold text-indigo-700">TindahanFlow</h1>
+            <div>
+                <h1 className="text-xl font-bold text-indigo-700">TindahanFlow</h1>
+                {username && <p className="text-[10px] text-gray-500">Hi, {username}</p>}
+            </div>
             <div className="flex gap-1">
                 <button 
                     onClick={onReset} 
@@ -66,6 +79,13 @@ export const Layout: React.FC<LayoutProps> = ({ currentView, setCurrentView, chi
                     title="Reset Data"
                 >
                     <RotateCcw size={20} />
+                </button>
+                <button 
+                    onClick={onLogout} 
+                    className="text-gray-500 p-2 rounded-full hover:bg-gray-100"
+                    title="Logout"
+                >
+                    <LogOut size={20} />
                 </button>
             </div>
          </div>

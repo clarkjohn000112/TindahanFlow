@@ -8,6 +8,7 @@ import { ProductEntry } from './components/ProductEntry';
 import { CustomerEntry } from './components/CustomerEntry';
 import { DebtEntry } from './components/DebtEntry';
 import { SmartAssistant } from './components/SmartAssistant';
+import { LoginPage } from './components/LoginPage';
 import { View, Transaction, Customer, Product, TransactionType, PaymentMethod } from './types';
 import { Plus, Loader2 } from 'lucide-react';
 import { 
@@ -25,10 +26,12 @@ import {
   updateCustomer,
   deleteCustomer,
   resetDatabase,
-  refreshCache
 } from './services/database';
 
 const App: React.FC = () => {
+  // Auth State
+  const [currentUser, setCurrentUser] = useState<string | null>(localStorage.getItem('tindahan_user'));
+
   const [currentView, setCurrentView] = useState<View>('DASHBOARD');
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -54,25 +57,44 @@ const App: React.FC = () => {
       method: PaymentMethod.CASH
   });
 
-  // Initialize DB and fetch data
+  // Initialize DB and fetch data (only if logged in)
   useEffect(() => {
-    const initialize = async () => {
-        try {
-            await initDB();
-            loadLocalData();
-        } catch (error) {
-            console.error("Failed to initialize DB", error);
-        } finally {
-            setIsLoading(false);
-        }
-    };
-    initialize();
-  }, []);
+    if (currentUser) {
+        const initialize = async () => {
+            setIsLoading(true);
+            try {
+                await initDB();
+                loadLocalData();
+            } catch (error) {
+                console.error("Failed to initialize DB", error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+        initialize();
+    } else {
+        setIsLoading(false);
+    }
+  }, [currentUser]);
 
   const loadLocalData = () => {
     setTransactions(getTransactions());
     setCustomers(getCustomers());
     setProducts(getProducts());
+  };
+
+  const handleLoginSuccess = (username: string) => {
+      setCurrentUser(username);
+      localStorage.setItem('tindahan_user', username);
+  };
+
+  const handleLogout = () => {
+      setCurrentUser(null);
+      localStorage.removeItem('tindahan_user');
+      // Clear local states
+      setTransactions([]);
+      setCustomers([]);
+      setProducts([]);
   };
 
   const handleQuickAction = (action: 'SALE' | 'EXPENSE' | 'UTANG') => {
@@ -202,6 +224,11 @@ const App: React.FC = () => {
       await deleteCustomer(id);
       loadLocalData();
       setIsSaving(false);
+  }
+
+  // If not logged in, show Login Page
+  if (!currentUser) {
+      return <LoginPage onLoginSuccess={handleLoginSuccess} />;
   }
 
   const renderContent = () => {
@@ -334,6 +361,8 @@ const App: React.FC = () => {
         currentView={currentView} 
         setCurrentView={setCurrentView} 
         onReset={handleReset}
+        onLogout={handleLogout}
+        username={currentUser}
     >
         {isSaving && (
             <div className="fixed inset-0 bg-black/20 z-[60] flex items-center justify-center cursor-wait">

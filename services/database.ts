@@ -1,6 +1,7 @@
 import { Transaction, Customer, Product } from '../types';
 
 // The Google Apps Script Web App URL
+// IMPORTANT: You must update your Google Apps Script with the Auth code provided!
 const API_URL = "https://script.google.com/macros/s/AKfycby49sceNP9u0YrUc7Ch5bMF0V1jJcqVEdqgMhWe7vfYn57aZ5orY8FljYaKWFpU7A5g/exec";
 
 // Local cache of the data to avoid frequent fetches for read operations
@@ -12,15 +13,12 @@ let cache = {
 
 // Helper to make POST requests to the Google Script
 const sendRequest = async (action: string, data?: any) => {
-    // We use no-cors or standard depending on script deployment. 
-    // Standard fetch usually works for "Execute as Me, Access: Anyone".
-    // We send data as a stringified JSON body.
     try {
         const response = await fetch(API_URL, {
             method: "POST",
             mode: "cors", 
             headers: {
-                "Content-Type": "text/plain;charset=utf-8", // text/plain avoids CORS preflight issues with GAS
+                "Content-Type": "text/plain;charset=utf-8",
             },
             body: JSON.stringify({ action, data })
         });
@@ -33,6 +31,18 @@ const sendRequest = async (action: string, data?: any) => {
         console.error("API Request Failed:", e);
         throw e;
     }
+};
+
+// --- AUTHENTICATION ---
+
+export const loginUser = async (username: string, password: string): Promise<{username: string}> => {
+    const result = await sendRequest("LOGIN", { username, password });
+    return result.user;
+};
+
+export const registerUser = async (username: string, password: string): Promise<{username: string}> => {
+    const result = await sendRequest("REGISTER", { username, password });
+    return result.user;
 };
 
 // --- INITIALIZATION ---
@@ -65,7 +75,6 @@ export const resetDatabase = async () => {
 };
 
 // --- DATA ACCESS METHODS (READ) ---
-// These return from local cache for speed, assuming cache is refreshed by the UI when changes occur.
 
 export const getProducts = (): Product[] => {
   return [...cache.products];
@@ -85,25 +94,21 @@ export const getTransactions = (): Transaction[] => {
 // PRODUCTS
 export const addProduct = async (p: Product) => {
     await sendRequest("ADD_PRODUCT", p);
-    // Optimistic update
     cache.products.push(p); 
 };
 
 export const updateProduct = async (p: Product) => {
     await sendRequest("UPDATE_PRODUCT", p);
-    // Optimistic update
     const index = cache.products.findIndex(prod => prod.id === p.id);
     if (index !== -1) cache.products[index] = p;
 };
 
 export const deleteProduct = async (id: string) => {
     await sendRequest("DELETE_PRODUCT", { id });
-    // Optimistic update
     cache.products = cache.products.filter(p => p.id !== id);
 };
 
 export const updateProductStock = async (id: string, newStock: number) => {
-    // Find product to get full object (needed for simplified API structure)
     const product = cache.products.find(p => p.id === id);
     if (product) {
         const updatedProduct = { ...product, stock: newStock };
