@@ -7,7 +7,6 @@ import { SalesEntry } from './components/SalesEntry';
 import { ProductEntry } from './components/ProductEntry';
 import { CustomerEntry } from './components/CustomerEntry';
 import { DebtEntry } from './components/DebtEntry';
-import { SmartAssistant } from './components/SmartAssistant';
 import { LoginPage } from './components/LoginPage';
 import { View, Transaction, Customer, Product, TransactionType, PaymentMethod } from './types';
 import { Plus, Loader2 } from 'lucide-react';
@@ -244,19 +243,12 @@ const App: React.FC = () => {
     switch (currentView) {
       case 'DASHBOARD':
         return (
-            <>
-                <SmartAssistant 
-                    transactions={transactions} 
-                    products={products} 
-                    customers={customers} 
-                />
-                <Dashboard 
-                    transactions={transactions} 
-                    customers={customers} 
-                    products={products} 
-                    onQuickAction={handleQuickAction}
-                />
-            </>
+            <Dashboard 
+                transactions={transactions} 
+                customers={customers} 
+                products={products} 
+                onQuickAction={handleQuickAction}
+            />
         );
       case 'SALES':
         return (

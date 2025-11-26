@@ -19,6 +19,7 @@ export const DebtEntry: React.FC<DebtEntryProps> = ({ customer, products, onSave
   
   const [amount, setAmount] = useState('');
   const [description, setDescription] = useState('');
+  const [error, setError] = useState('');
   
   // Product Selection State
   const [selectedProductId, setSelectedProductId] = useState('');
@@ -37,6 +38,7 @@ export const DebtEntry: React.FC<DebtEntryProps> = ({ customer, products, onSave
         setAmount('');
         setDescription('');
      }
+     setError('');
   }, [action]);
 
   // Auto-calculate amount and description when product/quantity changes
@@ -55,7 +57,17 @@ export const DebtEntry: React.FC<DebtEntryProps> = ({ customer, products, onSave
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!amount || isNaN(Number(amount))) return;
+    setError('');
+
+    if (!amount || Number(amount) <= 0) {
+        setError("Amount must be greater than 0.");
+        return;
+    }
+
+    if (mode === 'PRODUCT' && action === 'BORROW' && !selectedProductId) {
+        setError("Please select a product.");
+        return;
+    }
 
     const finalQty = parseInt(quantityStr) || 1;
 
@@ -109,6 +121,12 @@ export const DebtEntry: React.FC<DebtEntryProps> = ({ customer, products, onSave
              {CURRENCY}{customer.totalDebt.toLocaleString()}
           </span>
       </div>
+
+      {error && (
+        <div className="mb-4 p-3 bg-rose-50 text-rose-700 text-sm rounded-lg border border-rose-100">
+            {error}
+        </div>
+      )}
 
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Action Toggles */}
@@ -221,7 +239,8 @@ export const DebtEntry: React.FC<DebtEntryProps> = ({ customer, products, onSave
             }`}
             placeholder="0.00"
             required
-            min="0"
+            min="0.01"
+            step="0.01"
           />
         </div>
 

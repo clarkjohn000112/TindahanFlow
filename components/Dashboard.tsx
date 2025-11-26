@@ -1,5 +1,5 @@
 import React from 'react';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, LabelList } from 'recharts';
 import { DollarSign, ShoppingCart, Users, AlertTriangle } from 'lucide-react';
 import { Transaction, Customer, Product, TransactionType } from '../types';
 import { StatsCard } from './StatsCard';
@@ -68,17 +68,35 @@ export const Dashboard: React.FC<DashboardProps> = ({ transactions, customers, p
           <h3 className="text-lg font-bold text-gray-800 mb-4">Cash Flow Overview</h3>
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={data} layout="vertical">
+              <BarChart 
+                data={data} 
+                layout="vertical" 
+                margin={{ top: 0, right: 80, left: 0, bottom: 0 }}
+              >
                 <XAxis type="number" hide />
-                <YAxis dataKey="name" type="category" axisLine={false} tickLine={false} />
+                <YAxis 
+                    dataKey="name" 
+                    type="category" 
+                    axisLine={false} 
+                    tickLine={false} 
+                    width={80}
+                    tick={{ fill: '#374151', fontSize: 14, fontWeight: 500 }}
+                />
                 <Tooltip 
                    contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
-                   cursor={{fill: 'transparent'}}
+                   cursor={{fill: '#f3f4f6', opacity: 0.5}}
+                   formatter={(value: number) => [`${CURRENCY}${value.toLocaleString()}`, 'Amount']}
                 />
                 <Bar dataKey="amount" radius={[0, 4, 4, 0]} barSize={40}>
                   {data.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={index === 0 ? '#10b981' : '#f43f5e'} />
                   ))}
+                  <LabelList 
+                    dataKey="amount" 
+                    position="right" 
+                    formatter={(val: number) => `${CURRENCY}${val.toLocaleString()}`}
+                    style={{ fill: '#6B7280', fontSize: 13, fontWeight: 600 }}
+                  />
                 </Bar>
               </BarChart>
             </ResponsiveContainer>

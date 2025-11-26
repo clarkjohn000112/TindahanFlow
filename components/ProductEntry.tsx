@@ -15,6 +15,7 @@ export const ProductEntry: React.FC<ProductEntryProps> = ({ onSave, onCancel, in
   const [cost, setCost] = useState('');
   const [stock, setStock] = useState('');
   const [lowStockThreshold, setLowStockThreshold] = useState('10');
+  const [error, setError] = useState('');
 
   useEffect(() => {
     if (initialProduct) {
@@ -29,14 +30,31 @@ export const ProductEntry: React.FC<ProductEntryProps> = ({ onSave, onCancel, in
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name || !price || !stock) return;
+    setError('');
+
+    // --- VALIDATION ---
+    if (!name.trim()) {
+        setError("Product name is required.");
+        return;
+    }
+    const numPrice = Number(price);
+    if (isNaN(numPrice) || numPrice < 0) {
+        setError("Price cannot be negative.");
+        return;
+    }
+    const numStock = Number(stock);
+    if (isNaN(numStock) || numStock < 0) {
+        setError("Stock cannot be negative.");
+        return;
+    }
+    // ------------------
 
     onSave({
-      name,
-      category: category || 'General',
-      price: Number(price),
+      name: name.trim(),
+      category: category.trim() || 'General',
+      price: numPrice,
       cost: Number(cost) || 0,
-      stock: Number(stock),
+      stock: numStock,
       lowStockThreshold: Number(lowStockThreshold),
     });
   };
@@ -50,9 +68,15 @@ export const ProductEntry: React.FC<ProductEntryProps> = ({ onSave, onCancel, in
         </button>
       </div>
 
+      {error && (
+        <div className="mb-4 p-3 bg-rose-50 text-rose-700 text-sm rounded-lg border border-rose-100">
+            {error}
+        </div>
+      )}
+
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Product Name</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Product Name <span className="text-red-500">*</span></label>
           <input
             type="text"
             value={name}
@@ -76,7 +100,7 @@ export const ProductEntry: React.FC<ProductEntryProps> = ({ onSave, onCancel, in
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Selling Price (₱)</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Selling Price (₱) <span className="text-red-500">*</span></label>
             <input
               type="number"
               value={price}
@@ -85,10 +109,11 @@ export const ProductEntry: React.FC<ProductEntryProps> = ({ onSave, onCancel, in
               placeholder="0.00"
               required
               min="0"
+              step="0.01"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Cost (₱) <span className="text-gray-400 font-normal">(Optional)</span></label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Cost (₱) <span className="text-gray-400 font-normal">(Opt)</span></label>
             <input
               type="number"
               value={cost}
@@ -96,13 +121,14 @@ export const ProductEntry: React.FC<ProductEntryProps> = ({ onSave, onCancel, in
               className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 outline-none"
               placeholder="0.00"
               min="0"
+              step="0.01"
             />
           </div>
         </div>
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Current Stock</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Current Stock <span className="text-red-500">*</span></label>
             <input
               type="number"
               value={stock}

@@ -25,6 +25,7 @@ export const SalesEntry: React.FC<SalesEntryProps> = ({
   const [paymentMethod, setPaymentMethod] = useState<PaymentMethod>(initialPaymentMethod);
   const [selectedCustomerId, setSelectedCustomerId] = useState<string>('');
   const [selectedProductId, setSelectedProductId] = useState<string>('');
+  const [error, setError] = useState('');
   
   // Use string for quantity to allow clearing the input ("") while typing
   const [quantityStr, setQuantityStr] = useState<string>('1');
@@ -43,14 +44,29 @@ export const SalesEntry: React.FC<SalesEntryProps> = ({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!amount || isNaN(Number(amount))) return;
+    setError('');
+
+    // --- VALIDATION ---
+    if (!amount || Number(amount) <= 0) {
+        setError("Total amount must be greater than 0.");
+        return;
+    }
+    if (!description.trim()) {
+        setError("Description is required.");
+        return;
+    }
+    if (type === TransactionType.SALE && paymentMethod === PaymentMethod.CREDIT && !selectedCustomerId) {
+        setError("Please select a customer for Utang transactions.");
+        return;
+    }
+    // ------------------
 
     const finalQty = parseInt(quantityStr) || 1;
 
     onSave({
       type,
       amount: Number(amount),
-      description,
+      description: description.trim(),
       paymentMethod,
       customerId: paymentMethod === PaymentMethod.CREDIT ? selectedCustomerId : undefined,
       productId: selectedProductId || undefined,
@@ -59,7 +75,6 @@ export const SalesEntry: React.FC<SalesEntryProps> = ({
   };
 
   const handleQuantityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-      // Allow user to type empty string or numbers
       const val = e.target.value;
       if (val === '' || /^\d+$/.test(val)) {
           setQuantityStr(val);
@@ -75,13 +90,22 @@ export const SalesEntry: React.FC<SalesEntryProps> = ({
         </button>
       </div>
 
+      {error && (
+        <div className="mb-4 p-3 bg-rose-50 text-rose-700 text-sm rounded-lg border border-rose-100">
+            {error}
+        </div>
+      )}
+
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Transaction Type Tabs */}
         <div className="flex p-1 bg-gray-100 rounded-lg">
           <button
             type="button"
             className={`flex-1 py-2 text-sm font-medium rounded-md transition-all ${type === TransactionType.SALE ? 'bg-emerald-500 text-white shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}
-            onClick={() => setType(TransactionType.SALE)}
+            onClick={() => {
+                setType(TransactionType.SALE);
+                setError('');
+            }}
           >
             Sale
           </button>
@@ -92,6 +116,7 @@ export const SalesEntry: React.FC<SalesEntryProps> = ({
                 setType(TransactionType.EXPENSE);
                 setPaymentMethod(PaymentMethod.CASH);
                 setSelectedProductId('');
+                setError('');
             }}
           >
             Expense
@@ -145,7 +170,8 @@ export const SalesEntry: React.FC<SalesEntryProps> = ({
             className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none text-lg font-bold"
             placeholder="0.00"
             required
-            min="0"
+            min="0.01"
+            step="0.01"
           />
         </div>
 
@@ -178,7 +204,7 @@ export const SalesEntry: React.FC<SalesEntryProps> = ({
 
         {type === TransactionType.SALE && paymentMethod === PaymentMethod.CREDIT && (
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Select Customer</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Select Customer <span className="text-red-500">*</span></label>
             <select
               value={selectedCustomerId}
               onChange={(e) => setSelectedCustomerId(e.target.value)}

@@ -25,7 +25,7 @@ export const Layout: React.FC<LayoutProps> = ({ currentView, setCurrentView, chi
       <aside className="hidden md:flex flex-col w-64 bg-white border-r border-gray-200 h-screen sticky top-0 z-30">
         <div className="p-6 border-b border-gray-100">
             <h1 className="text-2xl font-bold text-indigo-700 flex items-center gap-2">
-                Tindahan<span className="text-gray-800">Flow</span>
+                Tindahan<span className="text-gray-800">NiPogi</span>
             </h1>
             {username && <p className="text-xs text-gray-500 mt-1">Logged in as {username}</p>}
         </div>
@@ -69,7 +69,7 @@ export const Layout: React.FC<LayoutProps> = ({ currentView, setCurrentView, chi
          {/* Mobile Header */}
          <div className="md:hidden bg-white p-4 sticky top-0 z-20 shadow-sm flex items-center justify-between">
             <div>
-                <h1 className="text-xl font-bold text-indigo-700">TindahanFlow</h1>
+                <h1 className="text-xl font-bold text-indigo-700">TindahanNiPogi</h1>
                 {username && <p className="text-[10px] text-gray-500">Hi, {username}</p>}
             </div>
             <div className="flex gap-1">

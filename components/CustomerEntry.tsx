@@ -12,6 +12,7 @@ export const CustomerEntry: React.FC<CustomerEntryProps> = ({ onSave, onCancel, 
   const [name, setName] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
   const [initialDebt, setInitialDebt] = useState('');
+  const [error, setError] = useState('');
 
   useEffect(() => {
     if (initialCustomer) {
@@ -23,11 +24,27 @@ export const CustomerEntry: React.FC<CustomerEntryProps> = ({ onSave, onCancel, 
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name) return;
+    setError('');
+
+    // --- VALIDATION ---
+    if (!name.trim()) {
+        setError("Customer name is required.");
+        return;
+    }
+    const debtVal = Number(initialDebt);
+    if (initialDebt && (isNaN(debtVal) || debtVal < 0)) {
+        setError("Initial debt cannot be negative.");
+        return;
+    }
+    if (phoneNumber && !/^[\d\s+\-()]*$/.test(phoneNumber)) {
+        setError("Invalid phone number format.");
+        return;
+    }
+    // ------------------
 
     onSave({
-      name,
-      phoneNumber,
+      name: name.trim(),
+      phoneNumber: phoneNumber.trim(),
       totalDebt: Number(initialDebt) || 0,
     });
   };
@@ -41,9 +58,15 @@ export const CustomerEntry: React.FC<CustomerEntryProps> = ({ onSave, onCancel, 
         </button>
       </div>
 
+      {error && (
+        <div className="mb-4 p-3 bg-rose-50 text-rose-700 text-sm rounded-lg border border-rose-100">
+            {error}
+        </div>
+      )}
+
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">Customer Name</label>
+          <label className="block text-sm font-medium text-gray-700 mb-1">Customer Name <span className="text-red-500">*</span></label>
           <input
             type="text"
             value={name}
